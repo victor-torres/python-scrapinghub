@@ -163,8 +163,8 @@ def test_truncate(hsproject, hscollection):
     test_item = _mkitem()
     with closing(hscollection.create_writer()) as writer:
         for i in range(20):
-            test_item['_key'] = "post_scan_test%d" % i
+            test_item['_key'] = "my_key_%d" % i
             test_item['counter'] = i
             writer.write(test_item)
 
-    assert len(list(hscollection.iter_values())) == 20
+    assert len(list(hscollection.iter_values(prefix='my_key'))) == 20
