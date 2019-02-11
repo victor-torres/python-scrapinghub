@@ -167,7 +167,4 @@ def test_truncate(hsproject, hscollection):
             test_item['counter'] = i
             writer.write(test_item)
 
-    assert len(hscollection.get()) == 20
-
-    hscollection.truncate()
-    assert len(hscollection.get()) == 0
+    assert len(list(hscollection.iter_values())) == 20
