@@ -158,7 +158,7 @@ def test_allows_msgpack(hsclient, path, expected_result, json_and_msgpack):
     assert collections._allows_mpack(path) is (hsclient.use_msgpack and expected_result)
 
 
-def test_truncate(hsproject, hscollection):
+def test_truncate(hscollection):
     # populate with 20 items
     test_item = _mkitem()
     with closing(hscollection.create_writer()) as writer:
