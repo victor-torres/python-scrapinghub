@@ -32,9 +32,9 @@ TEST_DASH_ENDPOINT = os.getenv('DASH_ENDPOINT', DEFAULT_DASH_ENDPOINT)
 class VCRGzipSerializer(object):
     """Custom ZIP serializer for VCR.py."""
     @staticmethod
-    def normalize_endpoint(uri, endpoint):
+    def normalize_endpoint(uri, endpoint, default_endpoint):
         old = endpoint
-        new = DEFAULT_ENDPOINT
+        new = default_endpoint
 
         if old.endswith('/'):
             old = old[:-1]
@@ -59,10 +59,10 @@ class VCRGzipSerializer(object):
             uri = uri.replace(TEST_PROJECT_ID, DEFAULT_PROJECT_ID)
 
             hs_endpoint = TEST_ENDPOINT or HubstorageClient.DEFAULT_ENDPOINT
-            uri = self.normalize_endpoint(uri, hs_endpoint)
+            uri = self.normalize_endpoint(uri, hs_endpoint, DEFAULT_ENDPOINT)
 
             dash_endpoint = TEST_DASH_ENDPOINT or Connection.DEFAULT_ENDPOINT
-            uri = self.normalize_endpoint(uri, dash_endpoint)
+            uri = self.normalize_endpoint(uri, dash_endpoint, DEFAULT_DASH_ENDPOINT)
 
             interaction['request']['uri'] = uri
 
