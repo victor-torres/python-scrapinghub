@@ -27,6 +27,8 @@ TEST_COLLECTION_NAME = "test_collection_123"
 TEST_AUTH = os.getenv('HS_AUTH', 'f' * 32)
 TEST_ENDPOINT = os.getenv('HS_ENDPOINT', DEFAULT_ENDPOINT)
 
+NORMALIZE_CASSETTES = os.getenv('NORMALIZE_CASSETTES', False)
+
 # vcrpy creates the cassetes automatically under VCR_CASSETES_DIR
 VCR_CASSETES_DIR = 'tests/hubstorage/cassetes'
 
@@ -34,7 +36,7 @@ VCR_CASSETES_DIR = 'tests/hubstorage/cassetes'
 class VCRGzipSerializer(object):
     """Custom ZIP serializer for VCR.py."""
     @staticmethod
-    def normalize_dict(cassette_dict):
+    def normalize_cassette(cassette_dict):
         """
         This function normalizes the cassette dict trying to make sure
         we are always making API requests with the same variables:
@@ -77,7 +79,9 @@ class VCRGzipSerializer(object):
         # receives a dict, must return a string
         # there can be binary data inside some of the requests,
         # so it's impossible to use json for serialization to string
-        cassette_dict = self.normalize_dict(cassette_dict)
+        if NORMALIZE_CASSETTES:
+            cassette_dict = self.normalize_cassette(cassette_dict)
+
         compressed = zlib.compress(pickle.dumps(cassette_dict, protocol=2))
         return base64.b64encode(compressed).decode('utf8')
 
