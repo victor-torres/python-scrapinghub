@@ -168,3 +168,6 @@ def test_truncate(hsproject, hscollection):
             writer.write(test_item)
 
     assert len(list(hscollection.iter_values(prefix='my_key'))) == 20
+
+    hscollection.truncate()
+    assert len(list(hscollection.iter_values(prefix='my_key'))) == 0
