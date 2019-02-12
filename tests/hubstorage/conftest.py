@@ -34,7 +34,19 @@ VCR_CASSETES_DIR = 'tests/hubstorage/cassetes'
 class VCRGzipSerializer(object):
     """Custom ZIP serializer for VCR.py."""
     @staticmethod
-    def normalize_cassette(cassette_dict):
+    def normalize_endpoint(uri):
+        old = TEST_ENDPOINT or HubstorageClient.DEFAULT_ENDPOINT
+        new = DEFAULT_ENDPOINT
+
+        if old.endswith('/'):
+            old = old[:-1]
+
+        if new.endswith('/'):
+            new = new[:-1]
+
+        return uri.replace(old, new)
+
+    def normalize_cassette(self, cassette_dict):
         """
         This function normalizes the cassette dict trying to make sure
         we are always making API requests with the same variables:
@@ -46,15 +58,8 @@ class VCRGzipSerializer(object):
         interactions = []
         for interaction in cassette_dict['interactions']:
             uri = interaction['request']['uri']
-            uri = uri.replace(
-                TEST_ENDPOINT or HubstorageClient.DEFAULT_ENDPOINT,
-                DEFAULT_ENDPOINT
-            )
-
-            uri = uri.replace(
-                TEST_PROJECT_ID,
-                DEFAULT_PROJECT_ID
-            )
+            uri = self.normalize_endpoint(uri)
+            uri = uri.replace(TEST_PROJECT_ID, DEFAULT_PROJECT_ID)
 
             interaction['request']['uri'] = uri
 
