@@ -15,14 +15,17 @@ from scrapinghub.hubstorage.serialization import MSGPACK_AVAILABLE
 
 from ..conftest import request_accept_header_matcher
 
+DEFAULT_PROJECT_ID = '2222222'
+DEFAULT_ENDPOINT = 'http://storage.vm.scrapinghub.com/'
 
-TEST_PROJECT_ID = os.environ.get('HS_PROJECT_ID', '2222222')
+
+TEST_PROJECT_ID = os.environ.get('HS_PROJECT_ID', DEFAULT_PROJECT_ID)
 TEST_SPIDER_NAME = 'hs-test-spider'
 TEST_FRONTIER_SLOT = 'site.com'
 TEST_BOTGROUP = 'python-hubstorage-test'
 TEST_COLLECTION_NAME = "test_collection_123"
 TEST_AUTH = os.getenv('HS_AUTH', 'f' * 32)
-TEST_ENDPOINT = os.getenv('HS_ENDPOINT', 'http://storage.vm.scrapinghub.com')
+TEST_ENDPOINT = os.getenv('HS_ENDPOINT', DEFAULT_ENDPOINT)
 
 # vcrpy creates the cassetes automatically under VCR_CASSETES_DIR
 VCR_CASSETES_DIR = 'tests/hubstorage/cassetes'
@@ -31,18 +34,37 @@ VCR_CASSETES_DIR = 'tests/hubstorage/cassetes'
 class VCRGzipSerializer(object):
     """Custom ZIP serializer for VCR.py."""
     @staticmethod
-    def replace_basic_authentication_headers(cassette_dict):
-        """Replace Basic Authentication headers to prevent committing
-        private API Keys."""
+    def normalize_dict(cassette_dict):
+        """
+        This function normalizes the cassette dict trying to make sure
+        we are always making API requests with the same variables:
+
+        - project id
+        - endpoint
+        - authentication header
+        """
         interactions = []
         for interaction in cassette_dict['interactions']:
+            uri = interaction['request']['uri']
+            uri = uri.replace(
+                TEST_ENDPOINT or HubstorageClient.DEFAULT_ENDPOINT,
+                DEFAULT_ENDPOINT
+            )
+
+            uri = uri.replace(
+                TEST_PROJECT_ID,
+                DEFAULT_PROJECT_ID
+            )
+
+            interaction['request']['uri'] = uri
+
             if 'Authorization' in interaction['request']['headers']:
                 del interaction['request']['headers']['Authorization']
                 interaction['request']['headers']['Authorization'] = [
                     'Basic {}'.format(
                         base64.b64encode(
                             '{}:'.format('f' * 32).encode('utf-8')
-                        )
+                        ).decode('utf-8')
                     )
                 ]
 
@@ -55,7 +77,7 @@ class VCRGzipSerializer(object):
         # receives a dict, must return a string
         # there can be binary data inside some of the requests,
         # so it's impossible to use json for serialization to string
-        cassette_dict = self.replace_basic_authentication_headers(cassette_dict)
+        cassette_dict = self.normalize_dict(cassette_dict)
         compressed = zlib.compress(pickle.dumps(cassette_dict, protocol=2))
         return base64.b64encode(compressed).decode('utf8')
 
