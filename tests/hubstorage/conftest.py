@@ -60,13 +60,13 @@ class VCRGzipSerializer(object):
 
             if 'Authorization' in interaction['request']['headers']:
                 del interaction['request']['headers']['Authorization']
-                interaction['request']['headers']['Authorization'] = [
+                interaction['request']['headers']['Authorization'] = (
                     'Basic {}'.format(
                         base64.b64encode(
                             '{}:'.format('f' * 32).encode('utf-8')
                         ).decode('utf-8')
                     )
-                ]
+                )
 
             interactions.append(interaction)
 
