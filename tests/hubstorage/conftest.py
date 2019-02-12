@@ -15,11 +15,11 @@ from scrapinghub.hubstorage.serialization import MSGPACK_AVAILABLE
 
 from ..conftest import request_accept_header_matcher
 
-DEFAULT_PROJECT_ID = '2222222'
-DEFAULT_ENDPOINT = 'http://storage.vm.scrapinghub.com/'
+DEFAULT_PROJECT_ID = "2222222"
+DEFAULT_ENDPOINT = 'http://storage.vm.scrapinghub.com'
 
 
-TEST_PROJECT_ID = os.environ.get('HS_PROJECT_ID', DEFAULT_PROJECT_ID)
+TEST_PROJECT_ID = os.getenv('HS_PROJECT_ID', DEFAULT_PROJECT_ID)
 TEST_SPIDER_NAME = 'hs-test-spider'
 TEST_FRONTIER_SLOT = 'site.com'
 TEST_BOTGROUP = 'python-hubstorage-test'
